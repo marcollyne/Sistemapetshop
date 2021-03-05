@@ -101,8 +101,7 @@ public class ProdutoServicoDAO {
         ps.executeUpdate();
     }
 
-    
-     public ArrayList<ProdutoServico> carregarProdutosServicos() throws Exception {
+    public ArrayList<ProdutoServico> carregarProdutosServicos() throws Exception {
         ArrayList<ProdutoServico> carregaProdutoServico = new ArrayList<>();
         String sql = "select * from produtos_servicos where registro_ativo = true";
         PreparedStatement ps = Conexao.getConexao().prepareStatement(sql);

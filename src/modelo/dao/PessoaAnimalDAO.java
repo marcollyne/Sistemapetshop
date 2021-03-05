@@ -143,7 +143,6 @@ public class PessoaAnimalDAO {
             pessoas.add(pessoa);
             pessoa.setAnimais(carregarAnimais(pessoa));
 
-            
         }
 
         return pessoas;

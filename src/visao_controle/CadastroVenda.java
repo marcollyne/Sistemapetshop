@@ -27,9 +27,6 @@ import modelo.dao.VendaDAO;
  */
 public class CadastroVenda extends javax.swing.JDialog {
 
-    /**
-     * Creates new form CadastroVenda
-     */
     private Pessoa pessoaselecionada;
     private PessoaAnimalDAO padao = new PessoaAnimalDAO();
     private ProdutoServicoDAO psdao = new ProdutoServicoDAO();
@@ -96,32 +93,39 @@ public class CadastroVenda extends javax.swing.JDialog {
     }
 
     private void adicionarItem() {
+        if (jtfQuantidade.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Por favor, insira todas as informações necessárias.", "ERRO",
+                    JOptionPane.ERROR_MESSAGE);
+        } else {
 
-        ItemVenda iv = new ItemVenda();
-        Animal animalselecionado = pessoaselecionada.getAnimais().get(jcbAnimal.getSelectedIndex());
-        iv.setAnimal(animalselecionado);
+            ItemVenda iv = new ItemVenda();
+            Animal animalselecionado = pessoaselecionada.getAnimais().get(jcbAnimal.getSelectedIndex());
+            iv.setAnimal(animalselecionado);
 
-        ProdutoServico produtoServicoSelecionado = listaps.get(jcbProdutoServico.getSelectedIndex());
-        iv.setProdutoServico(produtoServicoSelecionado);
+            ProdutoServico produtoServicoSelecionado = listaps.get(jcbProdutoServico.getSelectedIndex());
+            iv.setProdutoServico(produtoServicoSelecionado);
 
-        iv.setQuantidade(Integer.parseInt(jtfQuantidade.getText()));
+            iv.setQuantidade(Integer.parseInt(jtfQuantidade.getText()));
 
-        iv.setValorUnitario(Float.parseFloat(jtfPreco.getText()));
+            iv.setValorUnitario(Float.parseFloat(jtfPreco.getText()));
 
-        carrinho.add(iv);
+            carrinho.add(iv);
 
-        Object itens[] = new Object[5];
-        itens[0] = iv.getAnimal().getNome();
-        itens[1] = iv.getProdutoServico().getNome();
-        itens[2] = iv.getQuantidade();
-        itens[3] = iv.getValorUnitario();
-        itens[4] = iv.getQuantidade() * iv.getValorUnitario();
+            Object itens[] = new Object[5];
+            itens[0] = iv.getAnimal().getNome();
+            itens[1] = iv.getProdutoServico().getNome();
+            itens[2] = iv.getQuantidade();
+            itens[3] = iv.getValorUnitario();
+            itens[4] = iv.getQuantidade() * iv.getValorUnitario();
 
-        DefaultTableModel modelo = (DefaultTableModel) jtVenda.getModel();
+            DefaultTableModel modelo = (DefaultTableModel) jtVenda.getModel();
 
-        modelo.addRow(itens);
+            modelo.addRow(itens);
 
-        atualizarTotalCompra();
+            atualizarTotalCompra();
+            jtfQuantidade.setText("");
+
+        }
     }
 
     private void removerItem() {
@@ -573,23 +577,26 @@ public class CadastroVenda extends javax.swing.JDialog {
 
     private void jbSalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbSalvarActionPerformed
 
-        venda.setItens(carrinho);
-        venda.setCliente(pessoaselecionada);
-        venda.setDataHora(agora);
-
-        VendaDAO vdao = new VendaDAO();
-        try {
-            vdao.gravar(venda);
-            JOptionPane.showMessageDialog(this, "Salvo com sucesso, obrigado pela compra!", "♥",
-                    JOptionPane.INFORMATION_MESSAGE);
-        } catch (Exception ex) {
-            Logger.getLogger(CadastroVenda.class.getName()).log(Level.SEVERE, null, ex);
-            JOptionPane.showMessageDialog(this, "Erro ao salvar venda", "ERRO",
+        if (carrinho.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Adicione pelo menos um item na lista para efetuar a compra", "ERRO",
                     JOptionPane.ERROR_MESSAGE);
+        } else {
+            venda.setItens(carrinho);
+            venda.setCliente(pessoaselecionada);
+            venda.setDataHora(agora);
+
+            VendaDAO vdao = new VendaDAO();
+            try {
+                vdao.gravar(venda);
+                JOptionPane.showMessageDialog(this, "Salvo com sucesso, obrigado pela compra!", "♥",
+                        JOptionPane.INFORMATION_MESSAGE);
+                dispose();
+            } catch (Exception ex) {
+                Logger.getLogger(CadastroVenda.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(this, "Erro ao salvar venda", "ERRO",
+                        JOptionPane.ERROR_MESSAGE);
+            }
         }
-
-        dispose();
-
 
     }//GEN-LAST:event_jbSalvarActionPerformed
 

@@ -119,7 +119,6 @@ public class VendaDAO {
 
     public ArrayList<ItemVenda> listaItens(Venda venda) throws Exception {
         ArrayList<ItemVenda> itens = new ArrayList();
-        ItemVenda iv = new ItemVenda();
 
         String sql = " select iv.id, "
                 + " iv.venda_id, "
@@ -139,6 +138,7 @@ public class VendaDAO {
 
         //Faz a varredura na tabelinha de resultado da consulta
         while (result.next()) {
+            ItemVenda iv = new ItemVenda();
             ProdutoServico ps = new ProdutoServico();
             Animal a = new Animal();
 
