@@ -5,6 +5,8 @@
  */
 package visao_controle;
 
+import java.awt.Desktop;
+import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.logging.Level;
@@ -12,14 +14,24 @@ import java.util.logging.Logger;
 import modelo.Pessoa;
 import modelo.dao.PessoaAnimalDAO;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import modelo.Animal;
 import modelo.ItemVenda;
 import modelo.ProdutoServico;
 import modelo.Venda;
+import modelo.dao.Conexao;
 import modelo.dao.ProdutoServicoDAO;
 import modelo.dao.VendaDAO;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.view.JasperViewer;
 
 /**
  *
@@ -190,7 +202,6 @@ public class CadastroVenda extends javax.swing.JDialog {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        jbHome = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
         jcbCliente = new javax.swing.JComboBox<>();
@@ -211,21 +222,12 @@ public class CadastroVenda extends javax.swing.JDialog {
         jTextField9 = new javax.swing.JTextField();
         jtfTotal = new javax.swing.JTextField();
         jtfData = new javax.swing.JTextField();
+        jbRelatorioVenda = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
         jPanel1.setPreferredSize(new java.awt.Dimension(900, 690));
-
-        jbHome.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagens/home.png"))); // NOI18N
-        jbHome.setBorderPainted(false);
-        jbHome.setContentAreaFilled(false);
-        jbHome.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        jbHome.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jbHomeActionPerformed(evt);
-            }
-        });
 
         jLabel1.setBackground(new java.awt.Color(255, 255, 255));
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
@@ -440,21 +442,35 @@ public class CadastroVenda extends javax.swing.JDialog {
         jtfData.setToolTipText("");
         jtfData.setBorder(null);
 
+        jbRelatorioVenda.setBackground(new java.awt.Color(255, 255, 255));
+        jbRelatorioVenda.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jbRelatorioVenda.setForeground(new java.awt.Color(1, 22, 59));
+        jbRelatorioVenda.setText("Gerar Relatório");
+        jbRelatorioVenda.setToolTipText("");
+        jbRelatorioVenda.setBorderPainted(false);
+        jbRelatorioVenda.setContentAreaFilled(false);
+        jbRelatorioVenda.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jbRelatorioVenda.setMaximumSize(new java.awt.Dimension(103, 79));
+        jbRelatorioVenda.setMinimumSize(new java.awt.Dimension(103, 79));
+        jbRelatorioVenda.setPreferredSize(new java.awt.Dimension(125, 40));
+        jbRelatorioVenda.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbRelatorioVendaActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(30, 30, 30)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jbHome, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jtfData, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(30, 30, 30)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jbAdicionarItem, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
@@ -479,23 +495,24 @@ public class CadastroVenda extends javax.swing.JDialog {
                                     .addComponent(jTextField8, javax.swing.GroupLayout.PREFERRED_SIZE, 169, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addGap(206, 206, 206)
                                     .addComponent(jbExcluirItem, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 543, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGap(24, 24, 24)
-                                .addComponent(jbSalvar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 543, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                 .addContainerGap(25, Short.MAX_VALUE))
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(238, 238, 238)
+                .addComponent(jbSalvar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(26, 26, 26)
+                .addComponent(jbRelatorioVenda, javax.swing.GroupLayout.PREFERRED_SIZE, 153, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel1)
-                        .addComponent(jtfData, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jtfData, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addContainerGap()
-                        .addComponent(jbHome)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel1)))
+                .addGap(46, 46, 46)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -527,9 +544,11 @@ public class CadastroVenda extends javax.swing.JDialog {
                     .addComponent(jbAdicionarItem, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jTextField9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jtfTotal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 27, Short.MAX_VALUE)
-                .addComponent(jbSalvar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(45, 45, 45))
+                .addGap(30, 30, 30)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jbSalvar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jbRelatorioVenda, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(42, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -546,10 +565,6 @@ public class CadastroVenda extends javax.swing.JDialog {
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
-
-    private void jbHomeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbHomeActionPerformed
-        dispose();
-    }//GEN-LAST:event_jbHomeActionPerformed
 
     private void jcbProdutoServicoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jcbProdutoServicoActionPerformed
         ProdutoServico produtoservicoselecionado = listaps.get(jcbProdutoServico.getSelectedIndex());
@@ -590,7 +605,7 @@ public class CadastroVenda extends javax.swing.JDialog {
                 vdao.gravar(venda);
                 JOptionPane.showMessageDialog(this, "Salvo com sucesso, obrigado pela compra!", "♥",
                         JOptionPane.INFORMATION_MESSAGE);
-                dispose();
+
             } catch (Exception ex) {
                 Logger.getLogger(CadastroVenda.class.getName()).log(Level.SEVERE, null, ex);
                 JOptionPane.showMessageDialog(this, "Erro ao salvar venda", "ERRO",
@@ -605,6 +620,44 @@ public class CadastroVenda extends javax.swing.JDialog {
             evt.consume();
         }
     }//GEN-LAST:event_jtfQuantidadeKeyTyped
+
+    private void jbRelatorioVendaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbRelatorioVendaActionPerformed
+//        File arquivoRelatorio = new File("relatorios/Clientes.jrxml");
+//
+//        if (!arquivoRelatorio.exists()) {
+//            System.out.println("Arquivo nao encontrado");
+//            return;
+//        }
+        if (venda.getId() == 0) {
+            JOptionPane.showMessageDialog(this, "Cadastre uma venda para gerar o relatório", "ERRO",
+                    JOptionPane.ERROR_MESSAGE);
+        } else {
+
+            try {
+                JasperReport report = JasperCompileManager.compileReport("relatorios/Venda.jrxml");
+                Map<String, Object> parametros = new HashMap<>();
+                parametros.put("venda", venda.getId());
+                JasperPrint jasperPrint = JasperFillManager.fillReport(report, parametros, Conexao.getConexao());
+
+//            JasperViewer viewer = new JasperViewer(jasperPrint);
+//            viewer.setTitle("Vendas");
+//            viewer.setExtendedState(JasperViewer.MAXIMIZED_BOTH);
+//            viewer.setVisible(true);
+                //exportar para pdf
+                
+                JasperExportManager.exportReportToPdfFile(jasperPrint, "relatorios/Venda" + venda.getId() + ".pdf");
+                File relatoriopdf = new File("relatorios/Venda" + venda.getId() + ".pdf");
+                Desktop desktop = Desktop.getDesktop();
+                desktop.open(relatoriopdf);
+                dispose();
+
+            } catch (Exception ex) {
+                Logger.getLogger(CadastroVenda.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(this, "Erro ao gerar relatório", "ERRO",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }//GEN-LAST:event_jbRelatorioVendaActionPerformed
 
     /**
      * @param args the command line arguments
@@ -654,7 +707,7 @@ public class CadastroVenda extends javax.swing.JDialog {
     private javax.swing.JTextField jTextField9;
     private javax.swing.JButton jbAdicionarItem;
     private javax.swing.JButton jbExcluirItem;
-    private javax.swing.JButton jbHome;
+    private javax.swing.JButton jbRelatorioVenda;
     private javax.swing.JButton jbSalvar;
     private javax.swing.JComboBox<String> jcbAnimal;
     private javax.swing.JComboBox<String> jcbCliente;
